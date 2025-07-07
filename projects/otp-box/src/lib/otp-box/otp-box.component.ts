@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, forwardRef, Input, Output, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, EventEmitter, forwardRef, Input, Output, ChangeDetectorRef, PLATFORM_ID, Inject } from '@angular/core';
 import { FormsModule, NG_VALUE_ACCESSOR, NG_VALIDATORS, ControlValueAccessor, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Component({
@@ -48,7 +48,14 @@ export class OtpBoxComponent implements ControlValueAccessor, Validator {
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  private isBrowser: boolean;
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit() {
     // Initialize OTP array based on length
@@ -126,14 +133,16 @@ export class OtpBoxComponent implements ControlValueAccessor, Validator {
   onInputBlur(index: number) {
     // Only mark as touched when user leaves the OTP input area
     // Check if focus is moving to another OTP input
-    setTimeout(() => {
-      const activeElement = document.activeElement;
-      const isStillInOtpInputs = activeElement && activeElement.id && activeElement.id.startsWith('otp-');
-      
-      if (!isStillInOtpInputs) {
-        this.markAsTouched();
-      }
-    }, 100);
+    if (this.isBrowser) {
+      setTimeout(() => {
+        const activeElement = document.activeElement;
+        const isStillInOtpInputs = activeElement && activeElement.id && activeElement.id.startsWith('otp-');
+        
+        if (!isStillInOtpInputs) {
+          this.markAsTouched();
+        }
+      }, 100);
+    }
   }
 
   // Public method to trigger validation
@@ -271,11 +280,13 @@ export class OtpBoxComponent implements ControlValueAccessor, Validator {
 
   // Start monitoring clipboard
   startClipboardMonitoring() {
-    this.clipboardMonitorInterval = setInterval(async () => {
-      if (document.hasFocus() && this.isOtpEmpty()) {
-        await this.checkForClipboardOtp();
-      }
-    }, 2000);
+    if (this.isBrowser) {
+      this.clipboardMonitorInterval = setInterval(async () => {
+        if (document.hasFocus() && this.isOtpEmpty()) {
+          await this.checkForClipboardOtp();
+        }
+      }, 2000);
+    }
   }
 
   stopClipboardMonitoring() {
@@ -307,10 +318,12 @@ export class OtpBoxComponent implements ControlValueAccessor, Validator {
   }
 
   focusField(index: number) {
-    setTimeout(() => {
-      const input = document.getElementById(`otp-${index}`) as HTMLInputElement;
-      input?.focus();
-    }, 0);
+    if (this.isBrowser) {
+      setTimeout(() => {
+        const input = document.getElementById(`otp-${index}`) as HTMLInputElement;
+        input?.focus();
+      }, 0);
+    }
   }
 
   clearOtp() {
@@ -404,12 +417,14 @@ export class OtpBoxComponent implements ControlValueAccessor, Validator {
     if (event.key === 'Backspace') {
       if (!input.value && index > 0) {
         event.preventDefault();
-        const prevInput = document.getElementById('otp-' + (index - 1)) as HTMLInputElement;
-        if (prevInput) {
-          prevInput.focus();
-          this.otp[index - 1] = '';
-          prevInput.value = '';
-          this.emitOtpChange();
+        if (this.isBrowser) {
+          const prevInput = document.getElementById('otp-' + (index - 1)) as HTMLInputElement;
+          if (prevInput) {
+            prevInput.focus();
+            this.otp[index - 1] = '';
+            prevInput.value = '';
+            this.emitOtpChange();
+          }
         }
       }
     }
