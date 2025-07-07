@@ -1,0 +1,25 @@
+{
+  "name": "ng-otp-box",
+  "version": "0.0.1",
+  "description": "A modern OTP (One Time Password) input component for Angular 19 with auto-fill detection, validation, and clipboard monitoring",
+  "keywords": ["angular", "otp", "one-time-password", "input", "component", "ng-otp", "otp-input", "angular-otp"],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ng-otp-box"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/ng-otp-box/issues"
+  },
+  "homepage": "https://github.com/yourusername/ng-otp-box#readme",
+  "peerDependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/core": "^19.2.0",
+    "@angular/forms": "^19.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

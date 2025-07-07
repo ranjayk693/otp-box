@@ -1,0 +1,93 @@
+<div class="otp-container">
+  <!-- OTP Input Fields -->
+  <div class="otp-inputs d-flex gap-2 justify-content-center mb-3">
+    @for(digit of otpArray; track $index; let i = $index){
+      <input 
+        type="text" 
+        maxlength="1" 
+        class="form-control text-center"
+        [class.is-invalid]="shouldShowInputError()"
+        style="width: 50px; height: calc(1.5em + 0.75rem + 2px); font-size: 1rem;" 
+        [(ngModel)]="otp[i]" 
+        (input)="onOtpInput($event, i)"
+        (keydown)="onOtpKeyDown($event, i)" 
+        (paste)="onOtpPaste($event, i)" 
+        (focus)="checkForClipboardOtp()"
+        (blur)="onInputBlur(i)"
+        [id]="'otp-' + i" 
+      />
+    }
+  </div>
+
+  <!-- Validation Errors -->
+  @if (shouldShowError()) {
+    <div class="text-center mb-2">
+      @if (errors!['required']) {
+        <small class="text-danger">OTP is required</small>
+      }
+      @else if (errors!['incomplete']) {
+        <small class="text-danger">Please enter all {{length}} digits</small>
+      }
+      @else if (errors!['pattern']) {
+        <small class="text-danger">OTP must contain only numbers</small>
+      }
+    </div>
+  }
+
+  @if (showClipboardDetection) {
+    <!-- Auto-fill Banner (shows when OTP detected) -->
+    @if (showAutoFillBanner && !isOtpFilled()) {
+      <div class="auto-fill-banner animate__animated animate__slideInDown">
+        <div class="alert alert-info d-flex align-items-center justify-content-between mb-3" role="alert">
+          <div class="d-flex align-items-center flex-grow-1 me-3">
+            <i class="fas fa-magic text-primary me-2"></i>
+            <span>
+              <strong>Auto-fill detected!</strong><br>
+              <small>Found OTP: <code>{{ detectedOtpCode }}</code> in clipboard</small>
+            </span>
+          </div>
+          <div class="btn-group ms-2 flex-shrink-0">
+            <button type="button" class="btn btn-primary btn-sm" (click)="autoFillOtp()">
+              <i class="fas fa-paste"></i> Auto-fill
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="dismissAutoFill()">
+              <i class="fas fa-times"></i> Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Quick Actions -->
+    <div class="quick-actions text-center">
+      @if (!showAutoFillBanner && clipboardChecked) {
+        <button 
+          type="button" 
+          class="btn btn-outline-primary btn-sm" 
+          (click)="manualClipboardCheck()"
+          [disabled]="isOtpFilled()"
+        >
+          <i class="fas fa-search"></i>
+          Check Clipboard for OTP
+        </button>
+      }
+
+      @if (isOtpFilled()) {
+        <button type="button" class="btn btn-outline-warning btn-sm ms-2" (click)="clearOtp()">
+          <i class="fas fa-eraser"></i>
+          Clear
+        </button>
+      }
+    </div>
+
+    <!-- Status Messages -->
+    <div class="status-messages text-center mt-2">
+      @if (lastCheckMessage) {
+        <small class="text-muted">
+          <i class="fas fa-info-circle"></i>
+          {{ lastCheckMessage }}
+        </small>
+      }
+    </div>
+  }
+</div>
